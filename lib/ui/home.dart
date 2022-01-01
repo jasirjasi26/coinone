@@ -1,16 +1,17 @@
 import 'package:coinone/blocks/data_block.dart';
 import 'package:coinone/models/coinone_data.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
 
-class DataList extends StatefulWidget {
-  const DataList({Key key}) : super(key: key);
+class HomePage extends StatefulWidget {
+  const HomePage({Key key}) : super(key: key);
 
   @override
-  DataListState createState() => DataListState();
+  HomePageState createState() => HomePageState();
 }
 
-class DataListState extends State<DataList> {
+class HomePageState extends State<HomePage> {
   int key = 0;
 
   final colorList = <Color>[
@@ -23,7 +24,7 @@ class DataListState extends State<DataList> {
   Widget build(BuildContext context) {
     bloc.fetchAllData();
     return Scaffold(
-      appBar:buildAppBar(),
+      appBar: buildAppBar(),
       body: ListView(
         children: [
           Center(
@@ -44,10 +45,9 @@ class DataListState extends State<DataList> {
     );
   }
 
-
   ///AppBar
   ///
-   buildAppBar(){
+  buildAppBar() {
     return AppBar(
       backgroundColor: Colors.white,
       leading: Padding(
@@ -66,8 +66,7 @@ class DataListState extends State<DataList> {
       elevation: 5,
       actions: [
         Padding(
-          padding:
-          const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
+          padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
           child: Container(
             child: Image.asset(
               'assets/settings.png',
@@ -84,14 +83,15 @@ class DataListState extends State<DataList> {
       children: [
         const Center(
             child: Padding(
-              padding: EdgeInsets.all(25.0),
-              child: Text(
-                "Dashboard",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-              ),
-            )),
+          padding: EdgeInsets.all(25.0),
+          child: Text(
+            "Dashboard",
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          ),
+        )),
+
         ///piChart widget
-        piChart(snapshot,context),
+        piChart(snapshot, context),
         const SizedBox(
           height: 20,
         ),
@@ -101,61 +101,64 @@ class DataListState extends State<DataList> {
           children: [
             Container(
                 child: Column(
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          height: 15,
-                          width: 15,
-                          decoration: BoxDecoration(
-                            color: Colors.cyan,
-                            borderRadius: BorderRadius.circular(50.0),
-                          ),
-                        ),
-                        const Text("  Class"),
-                      ],
+                    Container(
+                      height: 15,
+                      width: 15,
+                      decoration: BoxDecoration(
+                        color: const Color(0xff0984e3),
+                        borderRadius: BorderRadius.circular(50.0),
+                      ),
                     ),
-                    Text(snapshot.data.chartData.classTime.total.toString()),
+                    const Text("  Class"),
                   ],
-                )),
+                ),
+                Text("     "+durationToString(
+                    int.parse(snapshot.data.chartData.classTime.total)).replaceAll("0h", "")+"m",style: TextStyle(fontWeight: FontWeight.bold),),
+              ],
+            )),
             Container(
                 child: Column(
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          height: 15,
-                          width: 15,
-                          decoration: BoxDecoration(
-                            color: Colors.orange,
-                            borderRadius: BorderRadius.circular(50.0),
-                          ),
-                        ),
-                        const Text("  Study"),
-                      ],
+                    Container(
+                      height: 15,
+                      width: 15,
+                      decoration: BoxDecoration(
+                        color: const Color(0xffe17055),
+                        borderRadius: BorderRadius.circular(50.0),
+                      ),
                     ),
-                    Text(snapshot.data.chartData.studyTime.total.toString()),
+                    const Text("  Study"),
                   ],
-                )),
+                ),
+                Text("      "+durationToString(
+                    int.parse(snapshot.data.chartData.studyTime.total)).replaceAll("0h", "")+"m",style: TextStyle(fontWeight: FontWeight.bold),),
+              ],
+            )),
             Container(
                 child: Column(
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          height: 15,
-                          width: 15,
-                          decoration: BoxDecoration(
-                            color: Colors.greenAccent,
-                            borderRadius: BorderRadius.circular(50.0),
-                          ),
-                        ),
-                        const Text("  Free-time"),
-                      ],
+                    Container(
+                      height: 15,
+                      width: 15,
+                      decoration: BoxDecoration(
+                        color: Colors.greenAccent,
+                        borderRadius: BorderRadius.circular(50.0),
+                      ),
                     ),
-                    Text(snapshot.data.chartData.freeTime.total.toString()),
+                    const Text("  Free-time"),
                   ],
-                )),
+                ),
+                Text("    "+durationToString(
+                    int.parse(snapshot.data.chartData.freeTime.total)).replaceAll("0h", "")+"m",style: TextStyle(fontWeight: FontWeight.bold),),
+              ],
+            )),
           ],
         ),
         const Padding(
@@ -164,12 +167,12 @@ class DataListState extends State<DataList> {
         ),
         const Center(
             child: Padding(
-              padding: EdgeInsets.all(0.0),
-              child: Text(
-                "Free-time Usage",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-            )),
+          padding: EdgeInsets.all(0.0),
+          child: Text(
+            "Free-time Usage",
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+        )),
         const SizedBox(
           height: 10,
         ),
@@ -181,10 +184,11 @@ class DataListState extends State<DataList> {
               children: [
                 Text(
                   "Used",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  snapshot.data.deviceUsage.freeTime.mobile.toString() + "m",
+                  durationToString(snapshot.data.deviceUsage.freeTime.mobile).replaceAll("0h", "") +
+                      "m",
                   style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -199,10 +203,10 @@ class DataListState extends State<DataList> {
               children: [
                 Text(
                   "Max",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  snapshot.data.freeTimeMaxUsage.toString() + "m",
+                  durationToString(snapshot.data.freeTimeMaxUsage) + "m",
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -211,10 +215,10 @@ class DataListState extends State<DataList> {
         ),
         Container(
           margin: EdgeInsets.symmetric(vertical: 15),
-          width: MediaQuery.of(context).size.width * 0.8,
+          width: MediaQuery.of(context).size.width * 0.85,
           height: 35,
           child: const ClipRRect(
-            borderRadius: BorderRadius.all(Radius.circular(20)),
+            borderRadius: BorderRadius.all(Radius.circular(15)),
             child: LinearProgressIndicator(
               value: 0.3,
               valueColor: AlwaysStoppedAnimation<Color>(Color(0xff00ff00)),
@@ -225,7 +229,7 @@ class DataListState extends State<DataList> {
         Center(
           child: Container(
             margin: EdgeInsets.fromLTRB(0, 20, 0, 20),
-            width: MediaQuery.of(context).size.width * 0.8,
+            width: MediaQuery.of(context).size.width * 0.85,
             height: 45,
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -234,14 +238,11 @@ class DataListState extends State<DataList> {
                 ),
                 fit: BoxFit.fill,
               ),
-              //shape: BoxShape.circle,
             ),
             child: const Center(
               child: Text(
                 "Extend Free-time",
                 textAlign: TextAlign.left,
-                // overflow: TextOverflow.ellipsis,
-                // maxLines: 1,
                 style: TextStyle(
                     color: Colors.blueAccent,
                     fontSize: 16,
@@ -255,8 +256,6 @@ class DataListState extends State<DataList> {
           child: Text(
             "Change Time Restrictions",
             textAlign: TextAlign.left,
-            // overflow: TextOverflow.ellipsis,
-            // maxLines: 1,
             style: TextStyle(
                 color: Colors.blueAccent,
                 fontSize: 16,
@@ -272,8 +271,6 @@ class DataListState extends State<DataList> {
           child: Text(
             "By Devices",
             textAlign: TextAlign.left,
-            // overflow: TextOverflow.ellipsis,
-            // maxLines: 1,
             style: TextStyle(
                 color: Colors.black,
                 fontSize: 22,
@@ -311,8 +308,6 @@ class DataListState extends State<DataList> {
                     child: Text(
                       "Adi's Phone",
                       textAlign: TextAlign.left,
-                      // overflow: TextOverflow.ellipsis,
-                      // maxLines: 1,
                       style: TextStyle(
                           color: Colors.black,
                           fontSize: 18,
@@ -322,11 +317,10 @@ class DataListState extends State<DataList> {
                   ),
                   Center(
                     child: Text(
-                      snapshot.data.deviceUsage.totalTime.mobile.toString() +
+                      durationToString(
+                              snapshot.data.deviceUsage.totalTime.mobile).replaceAll("0h", "") +
                           "m",
                       textAlign: TextAlign.left,
-                      // overflow: TextOverflow.ellipsis,
-                      // maxLines: 1,
                       style: TextStyle(
                           color: Colors.blueAccent,
                           fontSize: 18,
@@ -374,7 +368,8 @@ class DataListState extends State<DataList> {
                   ),
                   Center(
                     child: Text(
-                      snapshot.data.deviceUsage.totalTime.laptop.toString() +
+                      durationToString(
+                              snapshot.data.deviceUsage.totalTime.laptop).replaceAll("0h", "") +
                           "m",
                       textAlign: TextAlign.left,
                       // overflow: TextOverflow.ellipsis,
@@ -414,8 +409,13 @@ class DataListState extends State<DataList> {
     );
   }
 
+  String durationToString(int minutes) {
+    var d = Duration(minutes: minutes);
+    List<String> parts = d.toString().split(':');
+    return '${parts[0].padRight(2, 'h')} ${parts[1].padLeft(2, '0')}';
+  }
 
-  piChart(AsyncSnapshot<Coinone> snapshot, BuildContext context){
+  piChart(AsyncSnapshot<Coinone> snapshot, BuildContext context) {
     return PieChart(
       chartValuesOptions: const ChartValuesOptions(
         showChartValueBackground: false,
@@ -432,13 +432,14 @@ class DataListState extends State<DataList> {
       animationDuration: const Duration(milliseconds: 800),
       //chartLegendSpacing: _chartLegendSpacing,
       chartRadius: 150,
-      centerText: "Total\n2h 40m",
-      ringStrokeWidth: 10,
+      centerText: "Total\n"+durationToString(int.parse(snapshot.data.chartData.totalTime.total))+"m",
+      ringStrokeWidth: 8,
       legendOptions: const LegendOptions(
         showLegends: false,
         showLegendsInRow: false,
       ),
-      centerTextStyle: const TextStyle(color: Colors.black, fontSize: 22),
+      centerTextStyle: const TextStyle(
+          color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold),
       chartType: ChartType.ring,
       initialAngleInDegree: 0,
       emptyColor: Colors.grey,

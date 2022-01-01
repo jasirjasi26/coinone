@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'package:coinone/models/coinone_data.dart';
-
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:http/http.dart' show Client;
 import 'dart:convert';
 

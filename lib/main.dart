@@ -1,4 +1,3 @@
-import 'package:coinone/ui/example.dart';
 import 'package:flutter/material.dart';
 import 'ui/home.dart';
 
@@ -14,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'Flutter Demo',
-      home:  DataList(),
+      home:  HomePage(),
     );
   }
 }

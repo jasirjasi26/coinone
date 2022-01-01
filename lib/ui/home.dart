@@ -1,411 +1,451 @@
 import 'package:coinone/blocks/data_block.dart';
-import 'package:flutter/foundation.dart';
+import 'package:coinone/models/coinone_data.dart';
 import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
 
-// ignore: constant_identifier_names
-enum LegendShape { Circle, Rectangle }
-
-class HomePage extends StatefulWidget {
-  const HomePage({Key key}) : super(key: key);
+class DataList extends StatefulWidget {
+  const DataList({Key key}) : super(key: key);
 
   @override
-  _HomePageState createState() => _HomePageState();
+  DataListState createState() => DataListState();
 }
 
-class _HomePageState extends State<HomePage> {
-  final dataMap = <String, double>{
-    "Flutter": 5,
-    "React": 3,
-    "Xamarin": 2,
-    "Ionic": 2,
-  };
-  final colorList = <Color>[
-    const Color(0xfffdcb6e),
-    const Color(0xff0984e3),
-    const Color(0xfffd79a8),
-    const Color(0xffe17055),
-    const Color(0xff6c5ce7),
-  ];
-
-  final gradientList = <List<Color>>[
-    [
-      const Color.fromRGBO(223, 250, 92, 1),
-      const Color.fromRGBO(129, 250, 112, 1),
-    ],
-    [
-      const Color.fromRGBO(129, 182, 205, 1),
-      const Color.fromRGBO(91, 253, 199, 1),
-    ],
-    [
-      const Color.fromRGBO(175, 63, 62, 1.0),
-      const Color.fromRGBO(254, 154, 92, 1),
-    ]
-  ];
-
-  ChartType _chartType = ChartType.disc;
-  bool _showCenterText = true;
-  double _ringStrokeWidth = 32;
-  double _chartLegendSpacing = 32;
-
-  bool _showLegendsInRow = false;
-  bool _showLegends = true;
-
-  bool _showChartValueBackground = true;
-  bool _showChartValues = true;
-  bool _showChartValuesInPercentage = false;
-  bool _showChartValuesOutside = false;
-
-  bool _showGradientColors = false;
-
-  LegendShape _legendShape = LegendShape.Circle;
-  LegendPosition _legendPosition = LegendPosition.right;
-
+class DataListState extends State<DataList> {
   int key = 0;
+
+  final colorList = <Color>[
+    const Color(0xffe17055),
+    const Color(0xff0984e3),
+    const Color(0xfffdcb6e),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final chart = PieChart(
-      key: ValueKey(key),
-      dataMap: dataMap,
-      animationDuration: const Duration(milliseconds: 800),
-      chartLegendSpacing: _chartLegendSpacing,
-      chartRadius: MediaQuery.of(context).size.width / 3.2 > 300
-          ? 300
-          : MediaQuery.of(context).size.width / 3.2,
-      colorList: colorList,
-      initialAngleInDegree: 0,
-      chartType: _chartType,
-      centerText: _showCenterText ? "HYBRID" : null,
-      legendOptions: LegendOptions(
-        showLegendsInRow: _showLegendsInRow,
-        legendPosition: _legendPosition,
-        showLegends: _showLegends,
-        legendShape: _legendShape == LegendShape.Circle
-            ? BoxShape.circle
-            : BoxShape.rectangle,
-        legendTextStyle: const TextStyle(
-          fontWeight: FontWeight.bold,
+    bloc.fetchAllData();
+    return Scaffold(
+      appBar:buildAppBar(),
+      body: ListView(
+        children: [
+          Center(
+            child: StreamBuilder(
+              stream: bloc.allData,
+              builder: (context, AsyncSnapshot<Coinone> snapshot) {
+                if (snapshot.hasData) {
+                  return buildList(snapshot, context);
+                } else if (snapshot.hasError) {
+                  return Text(snapshot.error.toString());
+                }
+                return const Center(child: CircularProgressIndicator());
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+
+  ///AppBar
+  ///
+   buildAppBar(){
+    return AppBar(
+      backgroundColor: Colors.white,
+      leading: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 0.0),
+        child: Container(
+          child: Image.asset(
+            'assets/appbarround.png',
+            height: 25,
+          ),
         ),
       ),
-      chartValuesOptions: ChartValuesOptions(
-        showChartValueBackground: _showChartValueBackground,
-        showChartValues: _showChartValues,
-        showChartValuesInPercentage: _showChartValuesInPercentage,
-        showChartValuesOutside: _showChartValuesOutside,
+      title: const Text(
+        'Mickel',
+        style: TextStyle(color: Colors.black),
       ),
-      ringStrokeWidth: _ringStrokeWidth,
+      elevation: 5,
+      actions: [
+        Padding(
+          padding:
+          const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
+          child: Container(
+            child: Image.asset(
+              'assets/settings.png',
+              height: 25,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildList(AsyncSnapshot<Coinone> snapshot, BuildContext context) {
+    return Column(
+      children: [
+        const Center(
+            child: Padding(
+              padding: EdgeInsets.all(25.0),
+              child: Text(
+                "Dashboard",
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              ),
+            )),
+        ///piChart widget
+        piChart(snapshot,context),
+        const SizedBox(
+          height: 20,
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Container(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          height: 15,
+                          width: 15,
+                          decoration: BoxDecoration(
+                            color: Colors.cyan,
+                            borderRadius: BorderRadius.circular(50.0),
+                          ),
+                        ),
+                        const Text("  Class"),
+                      ],
+                    ),
+                    Text(snapshot.data.chartData.classTime.total.toString()),
+                  ],
+                )),
+            Container(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          height: 15,
+                          width: 15,
+                          decoration: BoxDecoration(
+                            color: Colors.orange,
+                            borderRadius: BorderRadius.circular(50.0),
+                          ),
+                        ),
+                        const Text("  Study"),
+                      ],
+                    ),
+                    Text(snapshot.data.chartData.studyTime.total.toString()),
+                  ],
+                )),
+            Container(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          height: 15,
+                          width: 15,
+                          decoration: BoxDecoration(
+                            color: Colors.greenAccent,
+                            borderRadius: BorderRadius.circular(50.0),
+                          ),
+                        ),
+                        const Text("  Free-time"),
+                      ],
+                    ),
+                    Text(snapshot.data.chartData.freeTime.total.toString()),
+                  ],
+                )),
+          ],
+        ),
+        const Padding(
+          padding: EdgeInsets.all(15.0),
+          child: Divider(thickness: 1),
+        ),
+        const Center(
+            child: Padding(
+              padding: EdgeInsets.all(0.0),
+              child: Text(
+                "Free-time Usage",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+            )),
+        const SizedBox(
+          height: 10,
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Column(
+              children: [
+                Text(
+                  "Used",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  snapshot.data.deviceUsage.freeTime.mobile.toString() + "m",
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green),
+                )
+              ],
+            ),
+            const SizedBox(
+              width: 50,
+            ),
+            Column(
+              children: [
+                Text(
+                  "Max",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  snapshot.data.freeTimeMaxUsage.toString() + "m",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ],
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(vertical: 15),
+          width: MediaQuery.of(context).size.width * 0.8,
+          height: 35,
+          child: const ClipRRect(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+            child: LinearProgressIndicator(
+              value: 0.3,
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xff00ff00)),
+              backgroundColor: Color(0xffD6D6D5),
+            ),
+          ),
+        ),
+        Center(
+          child: Container(
+            margin: EdgeInsets.fromLTRB(0, 20, 0, 20),
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: 45,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(
+                  'assets/button_background.png',
+                ),
+                fit: BoxFit.fill,
+              ),
+              //shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Text(
+                "Extend Free-time",
+                textAlign: TextAlign.left,
+                // overflow: TextOverflow.ellipsis,
+                // maxLines: 1,
+                style: TextStyle(
+                    color: Colors.blueAccent,
+                    fontSize: 16,
+                    //height: 1.6,
+                    fontWeight: FontWeight.normal),
+              ),
+            ),
+          ),
+        ),
+        const Center(
+          child: Text(
+            "Change Time Restrictions",
+            textAlign: TextAlign.left,
+            // overflow: TextOverflow.ellipsis,
+            // maxLines: 1,
+            style: TextStyle(
+                color: Colors.blueAccent,
+                fontSize: 16,
+                //height: 1.6,
+                fontWeight: FontWeight.normal),
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.all(15.0),
+          child: Divider(thickness: 1),
+        ),
+        const Center(
+          child: Text(
+            "By Devices",
+            textAlign: TextAlign.left,
+            // overflow: TextOverflow.ellipsis,
+            // maxLines: 1,
+            style: TextStyle(
+                color: Colors.black,
+                fontSize: 22,
+                //height: 1.6,
+                fontWeight: FontWeight.bold),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Container(
+              margin: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+              width: 70,
+              height: 50,
+              child: Center(
+                child: Container(
+                  width: 30,
+                  height: 50,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(
+                        'assets/mobile.png',
+                      ),
+                      fit: BoxFit.fill,
+                    ),
+                    //shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              child: Column(
+                children: [
+                  Center(
+                    child: Text(
+                      "Adi's Phone",
+                      textAlign: TextAlign.left,
+                      // overflow: TextOverflow.ellipsis,
+                      // maxLines: 1,
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                          //height: 1.6,
+                          fontWeight: FontWeight.normal),
+                    ),
+                  ),
+                  Center(
+                    child: Text(
+                      snapshot.data.deviceUsage.totalTime.mobile.toString() +
+                          "m",
+                      textAlign: TextAlign.left,
+                      // overflow: TextOverflow.ellipsis,
+                      // maxLines: 1,
+                      style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontSize: 18,
+                          //height: 1.6,
+                          fontWeight: FontWeight.normal),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Container(
+              margin: EdgeInsets.fromLTRB(0, 10, 0, 20),
+              width: 70,
+              height: 50,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(
+                    'assets/laptop.png',
+                  ),
+                  fit: BoxFit.fill,
+                ),
+                //shape: BoxShape.circle,
+              ),
+            ),
+            Container(
+              child: Column(
+                children: [
+                  Center(
+                    child: Text(
+                      "Adi's Laptop",
+                      textAlign: TextAlign.left,
+                      // overflow: TextOverflow.ellipsis,
+                      // maxLines: 1,
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                          //height: 1.6,
+                          fontWeight: FontWeight.normal),
+                    ),
+                  ),
+                  Center(
+                    child: Text(
+                      snapshot.data.deviceUsage.totalTime.laptop.toString() +
+                          "m",
+                      textAlign: TextAlign.left,
+                      // overflow: TextOverflow.ellipsis,
+                      // maxLines: 1,
+                      style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontSize: 18,
+                          //height: 1.6,
+                          fontWeight: FontWeight.normal),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        const Center(
+          child: Text(
+            "See All Devices",
+            textAlign: TextAlign.left,
+            // overflow: TextOverflow.ellipsis,
+            // maxLines: 1,
+            style: TextStyle(
+                color: Colors.blueAccent,
+                fontSize: 16,
+                //height: 1.6,
+                fontWeight: FontWeight.normal),
+          ),
+        ),
+        const SizedBox(
+          height: 50,
+        ),
+      ],
+    );
+  }
+
+
+  piChart(AsyncSnapshot<Coinone> snapshot, BuildContext context){
+    return PieChart(
+      chartValuesOptions: const ChartValuesOptions(
+        showChartValueBackground: false,
+        showChartValues: false,
+        //showChartValuesInPercentage: _showChartValuesInPercentage,
+        //showChartValuesOutside: _showChartValuesOutside,
+      ),
+      key: ValueKey(key),
+      dataMap: <String, double>{
+        "Study": double.parse(snapshot.data.chartData.studyTime.total),
+        "Class": double.parse(snapshot.data.chartData.classTime.total),
+        "Free": double.parse(snapshot.data.chartData.freeTime.total),
+      },
+      animationDuration: const Duration(milliseconds: 800),
+      //chartLegendSpacing: _chartLegendSpacing,
+      chartRadius: 150,
+      centerText: "Total\n2h 40m",
+      ringStrokeWidth: 10,
+      legendOptions: const LegendOptions(
+        showLegends: false,
+        showLegendsInRow: false,
+      ),
+      centerTextStyle: const TextStyle(color: Colors.black, fontSize: 22),
+      chartType: ChartType.ring,
+      initialAngleInDegree: 0,
       emptyColor: Colors.grey,
-      gradientList: _showGradientColors ? gradientList : null,
       emptyColorGradient: const [
         Color(0xff6c5ce7),
         Colors.blue,
       ],
-    );
-    final settings = SingleChildScrollView(
-      child: Card(
-        margin: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            SwitchListTile(
-              value: _showGradientColors,
-              title: const Text("Show Gradient Colors"),
-              onChanged: (val) {
-                setState(() {
-                  _showGradientColors = val;
-                });
-              },
-            ),
-            ListTile(
-              title: Text(
-                'Pie Chart Options'.toUpperCase(),
-                style: Theme.of(context).textTheme.overline.copyWith(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            ListTile(
-              title: const Text("chartType"),
-              trailing: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: DropdownButton<ChartType>(
-                  value: _chartType,
-                  items: const [
-                    DropdownMenuItem(
-                      child: Text("disc"),
-                      value: ChartType.disc,
-                    ),
-                    DropdownMenuItem(
-                      child: Text("ring"),
-                      value: ChartType.ring,
-                    ),
-                  ],
-                  onChanged: (val) {
-                    setState(() {
-                      _chartType = val;
-                    });
-                  },
-                ),
-              ),
-            ),
-            ListTile(
-              title: const Text("ringStrokeWidth"),
-              trailing: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: DropdownButton<double>(
-                  value: _ringStrokeWidth,
-                  disabledHint: const Text("select chartType.ring"),
-                  items: const [
-                    DropdownMenuItem(
-                      child: Text("16"),
-                      value: 16,
-                    ),
-                    DropdownMenuItem(
-                      child: Text("32"),
-                      value: 32,
-                    ),
-                    DropdownMenuItem(
-                      child: Text("48"),
-                      value: 48,
-                    ),
-                  ],
-                  onChanged: (_chartType == ChartType.ring)
-                      ? (val) {
-                    setState(() {
-                      _ringStrokeWidth = val;
-                    });
-                  }
-                      : null,
-                ),
-              ),
-            ),
-            SwitchListTile(
-              value: _showCenterText,
-              title: const Text("showCenterText"),
-              onChanged: (val) {
-                setState(() {
-                  _showCenterText = val;
-                });
-              },
-            ),
-            ListTile(
-              title: const Text("chartLegendSpacing"),
-              trailing: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: DropdownButton<double>(
-                  value: _chartLegendSpacing,
-                  disabledHint: const Text("select chartType.ring"),
-                  items: const [
-                    DropdownMenuItem(
-                      child: Text("16"),
-                      value: 16,
-                    ),
-                    DropdownMenuItem(
-                      child: Text("32"),
-                      value: 32,
-                    ),
-                    DropdownMenuItem(
-                      child: Text("48"),
-                      value: 48,
-                    ),
-                    DropdownMenuItem(
-                      child: Text("64"),
-                      value: 64,
-                    ),
-                  ],
-                  onChanged: (val) {
-                    setState(() {
-                      _chartLegendSpacing = val;
-                    });
-                  },
-                ),
-              ),
-            ),
-            ListTile(
-              title: Text(
-                'Legend Options'.toUpperCase(),
-                style: Theme.of(context).textTheme.overline.copyWith(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            SwitchListTile(
-              value: _showLegendsInRow,
-              title: const Text("showLegendsInRow"),
-              onChanged: (val) {
-                setState(() {
-                  _showLegendsInRow = val;
-                });
-              },
-            ),
-            SwitchListTile(
-              value: _showLegends,
-              title: const Text("showLegends"),
-              onChanged: (val) {
-                setState(() {
-                  _showLegends = val;
-                });
-              },
-            ),
-            ListTile(
-              title: const Text("legendShape"),
-              trailing: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: DropdownButton<LegendShape>(
-                  value: _legendShape,
-                  items: const [
-                    DropdownMenuItem(
-                      child: Text("BoxShape.circle"),
-                      value: LegendShape.Circle,
-                    ),
-                    DropdownMenuItem(
-                      child: Text("BoxShape.rectangle"),
-                      value: LegendShape.Rectangle,
-                    ),
-                  ],
-                  onChanged: (val) {
-                    setState(() {
-                      _legendShape = val;
-                    });
-                  },
-                ),
-              ),
-            ),
-            ListTile(
-              title: const Text("legendPosition"),
-              trailing: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: DropdownButton<LegendPosition>(
-                  value: _legendPosition,
-                  items: const [
-                    DropdownMenuItem(
-                      child: Text("left"),
-                      value: LegendPosition.left,
-                    ),
-                    DropdownMenuItem(
-                      child: Text("right"),
-                      value: LegendPosition.right,
-                    ),
-                    DropdownMenuItem(
-                      child: Text("top"),
-                      value: LegendPosition.top,
-                    ),
-                    DropdownMenuItem(
-                      child: Text("bottom"),
-                      value: LegendPosition.bottom,
-                    ),
-                  ],
-                  onChanged: (val) {
-                    setState(() {
-                      _legendPosition = val;
-                    });
-                  },
-                ),
-              ),
-            ),
-            ListTile(
-              title: Text(
-                'Chart values Options'.toUpperCase(),
-                style: Theme.of(context).textTheme.overline.copyWith(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            SwitchListTile(
-              value: _showChartValueBackground,
-              title: const Text("showChartValueBackground"),
-              onChanged: (val) {
-                setState(() {
-                  _showChartValueBackground = val;
-                });
-              },
-            ),
-            SwitchListTile(
-              value: _showChartValues,
-              title: const Text("showChartValues"),
-              onChanged: (val) {
-                setState(() {
-                  _showChartValues = val;
-                });
-              },
-            ),
-            SwitchListTile(
-              value: _showChartValuesInPercentage,
-              title: const Text("showChartValuesInPercentage"),
-              onChanged: (val) {
-                setState(() {
-                  _showChartValuesInPercentage = val;
-                });
-              },
-            ),
-            SwitchListTile(
-              value: _showChartValuesOutside,
-              title: const Text("showChartValuesOutside"),
-              onChanged: (val) {
-                setState(() {
-                  _showChartValuesOutside = val;
-                });
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-
-    bloc.fetchAllData();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Mickel"),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                key = key + 1;
-              });
-            },
-            child: Text("Reload".toUpperCase()),
-          ),
-        ],
-      ),
-      body: LayoutBuilder(
-        builder: (_, constraints) {
-          if (constraints.maxWidth >= 600) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Flexible(
-                  flex: 3,
-                  fit: FlexFit.tight,
-                  child: chart,
-                ),
-                Flexible(
-                  flex: 2,
-                  fit: FlexFit.tight,
-                  child: settings,
-                )
-              ],
-            );
-          } else {
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  Container(
-                    child: chart,
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 32,
-                    ),
-                  ),
-                  settings,
-                ],
-              ),
-            );
-          }
-        },
-      ),
     );
   }
 }

@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'package:coinone/models/coinone_data.dart';
+import 'package:coinone/utils/app_config.dart';
 import 'package:http/http.dart' show Client;
 import 'dart:convert';
 
 class DataApiProvider {
   Client client = Client();
-  final _api = 'https://api.mocklets.com/p68289/screentime';
 
   Future<Coinone> fetchDataList() async {
-    final response = await client.get(Uri.parse(_api));
+    final response = await client.get(Uri.parse(AppConfig.base_url+AppConfig.screen_time));
     if (response.statusCode == 200) {
       // ignore: avoid_print
       List jsonResponse = json.decode(response.body);
